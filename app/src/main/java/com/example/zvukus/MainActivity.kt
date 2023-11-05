@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
+
             ZvukusTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -53,14 +54,14 @@ class MainActivity : ComponentActivity() {
                         Samples(Modifier.zIndex(1f))
                         Column(modifier = Modifier) {
                             Spacer(modifier = Modifier.weight(0.2f))
-                            Box(modifier = Modifier.weight(0.7f)) {
+                            Box(modifier = Modifier.weight(0.74f)) {
                                 Column {
-                                    WorkSpace(Modifier.weight(0.8f))
-                                    Timeline(Modifier.weight(0.2f))
+                                    WorkSpace(Modifier.weight(0.9f))
+                                    Timeline(Modifier.weight(0.1f))
                                 }
                                 Layers(Modifier.align(Alignment.BottomStart))
                             }
-                            ToolsPanel(Modifier.weight(0.1f), this@MainActivity)
+                            ToolsPanel(Modifier.weight(0.06f), this@MainActivity)
                         }
                     }
                 }

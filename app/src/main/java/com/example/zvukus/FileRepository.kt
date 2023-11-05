@@ -16,12 +16,11 @@ interface FileRepository {
     fun changeMute(id: String, mute: Boolean, player: MediaPlayer)
     fun changeVolume(id: String, player: MediaPlayer, volume: Float = 0.5f)
     fun changeInterval(id: String, player: MediaPlayer, interval: Float = 1f)
-    fun getTrackById(id: String):AudioTrack?
+    fun getTrackById(id: String): AudioTrack?
 }
 
 class FileRepositoryCollections @Inject constructor() : FileRepository {
 
-   // private val _trackMap = MutableStateFlow(mutableMapOf<String, AudioTrack>())
 
     private val tracksData = mutableMapOf<String, AudioTrack>()
     private val tracks = MutableStateFlow(tracksData.toMap())
@@ -36,11 +35,6 @@ class FileRepositoryCollections @Inject constructor() : FileRepository {
 
 
     override fun addNewTrackWithId(track: AudioTrack, player: MediaPlayer) {
-        /*  tracks.update {
-              tracksData.add(track.apply { mediaPlayer = player })
-              val data = tracksData//todo mabe ubrat?
-              data
-          }*/
 
         tracks.update {
             val exist = tracksData.putIfAbsent(
@@ -54,7 +48,7 @@ class FileRepositoryCollections @Inject constructor() : FileRepository {
                     track.loop,
                     track.priority,
                     track.intervalTime,
-                    "${track.name} 1",//todo podum increase
+                    "${track.name} ${tracks.value.size}",//todo podum increase
                     player,
                     track.resourceId,
                     track.file,
@@ -116,26 +110,4 @@ class FileRepositoryCollections @Inject constructor() : FileRepository {
     }
 
     override fun getTrackById(id: String): AudioTrack? = tracksData[id]
-
-
-/*    fun addTrack(track: AudioTrack, player: MediaPlayer) {//todo вынести плеер
-        _trackMap.update {
-            tracksData.putIfAbsent(
-                track.id,
-                track.apply { mediaPlayer = player })//todo как то небезопасно??может пут
-            tracksData
-        }
-    }*/
-
-    /*    fun addTrack11(track: AudioTrack) {
-            val x = _trackMap.value
-            if (x.putIfAbsent(track.id, track) != null) {
-                x[track.id] = track///todo mayne apdate name?
-            }
-            _trackMap.update {
-                x
-            }
-        }*/
-
-
 }

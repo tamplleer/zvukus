@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,18 +22,30 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.zvukus.PlayerViewModel
 import java.lang.StrictMath.round
 
+fun Modifier.vertical() =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        layout(placeable.height, placeable.width) {
+            placeable.place(
+                x = -(placeable.width / 2 - placeable.height / 2),
+                y = -(placeable.height / 2 - placeable.width / 2)
+            )
+        }
+    }
 
 @Composable
 fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewModel()) {
@@ -49,6 +63,7 @@ fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMod
     var maxOffsetY by remember { mutableStateOf(0f) }
     var minOffsetY by remember { mutableStateOf(0f) }
 
+    var sizePoint by remember { mutableStateOf(0f) }
     LaunchedEffect(trackId) {
         getTrackById(trackId)?.let {
             currentOffsetX = 10 * (maxOffsetY / 50) * (it.intervalTime ?: 0f)
@@ -60,6 +75,8 @@ fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMod
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+
     ) {
         Row {
             Column(
@@ -71,6 +88,7 @@ fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMod
             ) {
                 Box(
                     modifier = Modifier
+                        .padding(2.dp)
                         .graphicsLayer(
                             translationX = 0f,
                             translationY = currentOffsetY,
@@ -78,21 +96,24 @@ fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMod
                         .clip(RoundedCornerShape(10.dp))
                         .height(70.dp)
                         .width(20.dp)
-                        .background(MaterialTheme.colorScheme.secondary)
+                        .background(MaterialTheme.colorScheme.secondary),
 
-                ) {
+
+                    ) {
                     Text(
-                        modifier = Modifier.rotate(-90f),
-                        text = "Volume ${round(currentOffsetY / (maxOffsetY / 10))}",
+                        modifier = Modifier,
+                        color = MaterialTheme.colorScheme.background,
+                        text = " V${round(currentOffsetY / (maxOffsetY / 10))}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
             Box(
                 modifier = modifier
+                    .clip(RoundedCornerShape(20.dp))
                     .fillMaxWidth()
                     .fillMaxHeight(0.9f)
-                    .background(Color.Gray)
+                    .background(MaterialTheme.colorScheme.secondary)
                     .onGloballyPositioned { position ->
                         val positionX = position.size.width.toFloat()
                         val positionY = position.size.height.toFloat()
@@ -105,11 +126,12 @@ fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMod
                     }
             ) {
                 Box(modifier = Modifier
-                    .size(10.dp)
+                    .size(15.dp)
                     .graphicsLayer(
                         translationX = currentOffsetX,
                         translationY = currentOffsetY,
                     )
+                    .clip(RoundedCornerShape(10.dp))
                     .background(Color.Green)
                     .pointerInput(Unit) {
                         detectDragGestures(
@@ -119,16 +141,12 @@ fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMod
                             onDrag = { _, dragAmount ->
 
                                 val nextX = currentOffsetX + dragAmount.x
-                                if (nextX < maxOffsetX && nextX > minOffsetX) {
+                                if (nextX + sizePoint < maxOffsetX && nextX > minOffsetX) {
                                     currentOffsetX = nextX
-                                } else {
-                                    val x = 1
                                 }
                                 val nextY = currentOffsetY + dragAmount.y
-                                if (nextY < maxOffsetY && nextY > minOffsetY) {
+                                if (nextY + sizePoint < maxOffsetY && nextY > minOffsetY) {
                                     currentOffsetY = nextY
-                                } else {
-                                    val x = 1
                                 }
                             },
                             onDragEnd = {
@@ -136,6 +154,10 @@ fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMod
                                 changeIntervalTime(round(currentOffsetX / (maxOffsetX / 50)).toFloat() / 10)
                             },
                         )
+
+                    }
+                    .onGloballyPositioned { position ->
+                        sizePoint = position.size.width.toFloat()
 
                     }) {
 
@@ -154,6 +176,7 @@ fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMod
                         translationX = currentOffsetX,
                         translationY = 0f,
                     )
+                    .padding(2.dp)
                     .height(20.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .width(60.dp)
@@ -161,7 +184,11 @@ fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMod
 
             ) {
                 Text(
-                    text = "Speed ${round(currentOffsetX / (maxOffsetX / 10))} +",
+                    modifier = Modifier.align(
+                        Alignment.Center
+                    ),
+                    text = "Speed ${round(currentOffsetX / (maxOffsetX / 10))}",
+                    color = MaterialTheme.colorScheme.background,
                     style = MaterialTheme.typography.bodySmall
                 )
             }

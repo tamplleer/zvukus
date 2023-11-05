@@ -16,8 +16,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.zvukus.PlayerViewModel
+import com.example.zvukus.R
 
 @Composable
 fun RecordPanel(playerViewModel: PlayerViewModel = hiltViewModel()) {
@@ -69,19 +72,23 @@ fun RecordPanel(playerViewModel: PlayerViewModel = hiltViewModel()) {
     Row {
         IconButton(onClick = { recordMic() }) {
             Icon(
-                imageVector = if (isRecording) Icons.Default.Clear else Icons.Default.Phone,
+                painter = painterResource(R.drawable.mic),
+                tint = if (isRecording) Color.Red else Color.Black,
                 contentDescription = "Record mic"
             )
         }
         IconButton(onClick = { recordTrack() }) {
             Icon(
-                imageVector = Icons.Default.Favorite,
+                painter = painterResource(R.drawable.record),
+                tint = if (isRecordTrack) Color.Red else Color.Black,
                 contentDescription = "start recording"
             )
         }
         IconButton(onClick = { play() }) {
             Icon(
-                imageVector = if (selectedTrackPlaying == "all") Icons.Default.Close else Icons.Default.PlayArrow,
+                painter = if (selectedTrackPlaying == "all") painterResource(R.drawable.stop) else painterResource(
+                    R.drawable.play
+                ),
                 contentDescription = "Play record"//todo fix name
             )
         }

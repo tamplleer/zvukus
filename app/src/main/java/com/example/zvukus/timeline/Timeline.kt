@@ -9,6 +9,7 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -61,6 +62,7 @@ fun Timeline(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMode
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
             .background(MaterialTheme.colorScheme.primary)
             .onGloballyPositioned { position ->
                 maxOffsetX = position.size.width.toFloat()
@@ -69,8 +71,8 @@ fun Timeline(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMode
     ) {
         Box(
             modifier = Modifier
-                .height(20.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(20.dp))
                 .width(with(localDensity) { animatePlay.toDp() })
                 .background(Color.Green)
         ) {

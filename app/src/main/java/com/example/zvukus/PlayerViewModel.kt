@@ -56,7 +56,7 @@ class PlayerViewModel @Inject constructor(
 
 
     fun recordMic() {
-        recordFile = audioRecorder.start("test.mp3")
+        recordFile = audioRecorder.start("record${listTrackSize.value + 1}.mp3")
     }
 
     fun recordTrack() {
@@ -69,7 +69,7 @@ class PlayerViewModel @Inject constructor(
             val id = UUID.randomUUID().toString()
             audioManagerService.addAudioFile(id, it)?.also { player ->
                 val track =
-                    AudioTrack(id, 1.0f, 3, 1, null, "Record", file = it)
+                    AudioTrack(id, 1.0f, 3, 1, null, recordFile?.name ?: "record", file = it)
                 fileRepository.addNewTrackWithId(track, player)
                 selectTrack(track)
             }

@@ -40,9 +40,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.zvukus.PlayerViewModel
+import com.example.zvukus.R
 import com.example.zvukus.services.AudioTrack
 
 @Composable
@@ -57,7 +59,7 @@ fun Layers(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewModel(
 fun LayersUi(modifier: Modifier, listTrack: List<AudioTrack>, size: Int, showLayer: Boolean) {
     val lazyListState = rememberLazyListState()
     val density = LocalDensity.current
-    Column(modifier = modifier) {
+    Column(modifier = modifier.clip(RoundedCornerShape(20.dp)).background(MaterialTheme.colorScheme.outline).padding(2.dp).clip(RoundedCornerShape(20.dp)).background(MaterialTheme.colorScheme.background)) {
         AnimatedVisibility(
             visible = showLayer,
             enter = slideInVertically {
@@ -73,7 +75,7 @@ fun LayersUi(modifier: Modifier, listTrack: List<AudioTrack>, size: Int, showLay
             if (size != 0) {
                 LazyColumn(
                     state = lazyListState, modifier = Modifier
-                        .fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)
+                        .fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(
                         count = size,
@@ -114,7 +116,7 @@ fun Track(track: AudioTrack, playerViewModel: PlayerViewModel = hiltViewModel())
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
                 .fillMaxWidth(0.8f)
-                .background(if (isSelected == track.id) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary)
+                .background(if (isSelected == track.id) Color.Green else MaterialTheme.colorScheme.primary)
                 .clickable { select(track) },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -126,13 +128,17 @@ fun Track(track: AudioTrack, playerViewModel: PlayerViewModel = hiltViewModel())
                     play()
                 }) {
                     Icon(
-                        imageVector = if (selectedTrackPlaying == track.id) Icons.Default.Close else Icons.Default.PlayArrow,
+                        painter = if (selectedTrackPlaying == track.id) painterResource(R.drawable.stop) else painterResource(
+                            R.drawable.play
+                        ),
                         contentDescription = "play track"
                     )
                 }
                 IconButton(onClick = { mute(track, !track.mute) }) {
                     Icon(
-                        imageVector = if (track.mute) Icons.Default.Close else Icons.Filled.Notifications,
+                        painter = if (track.mute) painterResource(R.drawable.volume_off) else painterResource(
+                            R.drawable.volume
+                        ),
                         contentDescription = "mute"//todo fix descrip to change to unmute
                     )
                 }
@@ -142,7 +148,7 @@ fun Track(track: AudioTrack, playerViewModel: PlayerViewModel = hiltViewModel())
         }
         Button(onClick = { remove(track) }) {
             Icon(
-                imageVector = Icons.Default.Favorite,
+                painter = painterResource(R.drawable.delete),
                 contentDescription = "start recording"
             )
         }

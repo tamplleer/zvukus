@@ -32,7 +32,7 @@ fun Samples(modifier: Modifier) {
             1.0f,
             1,
             1,
-            4f,
+            2f,
             "Барабан Обычный",
             resourceId = R.raw.kick
         ), AudioTrack(
@@ -68,8 +68,8 @@ fun Samples(modifier: Modifier) {
             1,
             1,
             0.9f,
-            "Very sad music",
-            resourceId = R.raw.longsad
+            "Voice",
+            resourceId = R.raw.voice
         ), AudioTrack(
             UUID.randomUUID().toString(),
             0.5f,
@@ -77,39 +77,45 @@ fun Samples(modifier: Modifier) {
             1,
             0.9f,
             "Not sad music",
-            resourceId = R.raw.longsad
+            resourceId = R.raw.no_sad
         )
     )
-    val kicks2 = listOf(
+    val good = listOf(
         AudioTrack(
             UUID.randomUUID().toString(),
             1.0f,
             1,
             1,
             0.5f,
-            "Барабан 1",
-            resourceId = R.raw.kick
+            "Shakers",
+            resourceId = R.raw.shakers
         ), AudioTrack(
             UUID.randomUUID().toString(),
             1.0f,
             1,
             1,
             0.5f,
-            "Барабан 2",
-            resourceId = R.raw.clasic_kick
+            "Pitch",
+            resourceId = R.raw.pitch
         ), AudioTrack(
             UUID.randomUUID().toString(),
             1.0f,
             1,
             1,
             0.5f,
-            "Барабан 3",
-            resourceId = R.raw.lowkik
+            "Sci",
+            resourceId = R.raw.sci
         )
     )
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Sample(Icons.Default.Face, "gitara", kicks, expanded == "gitara", ::updateExpanded)
-        Sample(Icons.Default.Build, "viol", tracksGloom, expanded == "viol", ::updateExpanded)
-        Sample(Icons.Default.DateRange, "booms", kicks2, expanded == "booms", ::updateExpanded)
+        Sample(R.drawable.boom, "Booms!", kicks, expanded == "Booms!", ::updateExpanded)
+        Sample(
+            R.drawable.sad_man,
+            "Sad long",
+            tracksGloom,
+            expanded == "Sad long",
+            ::updateExpanded
+        )
+        Sample(R.drawable.poc, "Some good", good, expanded == "Some good", ::updateExpanded)
     }
 }
