@@ -83,7 +83,7 @@ class PlayerViewModel @Inject constructor(
 
     fun playAll() {
         audioManagerService.startAll(listTrack.value.values.toList(), scope)
-        _selectedTrackPlay.update { true }//todo think how to do
+        _selectedTrackPlay.update { true }
         _selectedTrackPlaying.update { "all" }
     }
 

@@ -15,7 +15,7 @@ interface AudioRecorder {
 }
 
 class AudioRecorderService @Inject constructor(@ApplicationContext val context: Context) :
-    AudioRecorder {    //todo change name
+    AudioRecorder {
     private var mediaRecorder: MediaRecorder? = null
     private fun createRecorder(): MediaRecorder =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) MediaRecorder(context)

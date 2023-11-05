@@ -139,7 +139,7 @@ fun Track(track: AudioTrack, playerViewModel: PlayerViewModel = hiltViewModel())
                         painter = if (track.mute) painterResource(R.drawable.volume_off) else painterResource(
                             R.drawable.volume
                         ),
-                        contentDescription = "mute"//todo fix descrip to change to unmute
+                        contentDescription = "mute"
                     )
                 }
             }

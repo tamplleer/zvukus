@@ -48,7 +48,7 @@ class FileRepositoryCollections @Inject constructor() : FileRepository {
                     track.loop,
                     track.priority,
                     track.intervalTime,
-                    "${track.name} ${tracks.value.size}",//todo podum increase
+                    "${track.name} ${tracks.value.size}",
                     player,
                     track.resourceId,
                     track.file,

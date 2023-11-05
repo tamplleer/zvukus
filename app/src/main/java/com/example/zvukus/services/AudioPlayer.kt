@@ -17,18 +17,6 @@ import javax.inject.Inject
 import kotlin.time.Duration
 
 
-interface IAudioPlayer {
-
-}
-
-fun tickerFlow(period: Duration, initialDelay: Duration = Duration.ZERO) = flow {
-    delay(initialDelay)
-    while (true) {
-        emit(Unit)
-        delay(period)
-    }
-}
-
 data class AudioTrack(
     val id: String,
     var volume: Float,
@@ -48,55 +36,6 @@ data class AudioTrack(
     }
 
 }
-
-/*
-class AudioPlayer(val context: Context, val listTrack: List<AudioTrack>) {
-    val soundPool = SoundPool.Builder()
-        .setMaxStreams(10) //todo Максимальное количество одновременных потоков (сколько??)
-        .build()
-
-    lateinit var soundIds: List<Int>
-    lateinit var streamIds: List<Int>
-    val soundId1 = soundPool.load(context, R.raw.longsad, 1)
-    val soundId2 = soundPool.load(context, R.raw.lowkik, 1)
-    var streamId1 by Delegates.notNull<Int>()
-    var streamId2 by Delegates.notNull<Int>()
-
-
-    // Воспроизвести звуки
-    fun loadAll() {
-        soundIds = listTrack.map { soundPool.load(context, it.id, it.priority) }
-        Log.i("aa", "soundIds =$soundIds")
-    }
-
-    fun start() {
-        streamId1 = soundPool.play(soundId1, 1.0f, 1.0f, 1, 1, 0.5f)
-        streamId2 = soundPool.play(soundId2, 1.0f, 1.0f, 1, 2, 2.0f)
-        Log.i("aa", "$streamId1 $streamId2")
-    }
-
-    fun startAll() {
-        listTrack.forEachIndexed { index, v ->
-            soundPool.play(index+1, v.volume, v.volume, v.priority, v.loop, v.rate)
-            Log.i("aa", "${index+1}")
-        }
-    }
-
-    fun stopAll() {
-        listTrack.forEachIndexed { index, v ->
-            soundPool.stop(index+1)
-            Log.i("aa", "stop = ${index+1}")
-        }
-        soundPool.release()
-    }
-
-    fun stop() {
-        soundPool.stop(streamId1)
-        soundPool.stop(streamId2)
-        soundPool.release()
-    }
-}
-*/
 
 interface AudioManagerService {
     fun addAudio(track: AudioTrack): MediaPlayer?
@@ -124,7 +63,7 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
     //  private val playersRun = MutableStateFlow(players.toMap())
 
     override fun addAudio(track: AudioTrack): MediaPlayer? {
-        return if (track.resourceId == null) {//todo add toast
+        return if (track.resourceId == null) {
             null
         } else {
             players[track.id] = UUID.randomUUID().toString()
@@ -222,12 +161,9 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
         for (track in tracks) {
             players[track.id] = UUID.randomUUID().toString()
             track.mediaPlayer?.apply {
-                stop()//todo restart
+                stop()
             }
-            // player.reset() todo mayme chtoto sdelat???/
-            // player.release()
         }
-        //players.clear()
     }
 
     override fun stopTrack(id: String, mediaPlayer: MediaPlayer?) {
@@ -244,6 +180,7 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
                 release()
             }
             //todo remove trakRun
+            //todo stop when close app
         }
     }
 
