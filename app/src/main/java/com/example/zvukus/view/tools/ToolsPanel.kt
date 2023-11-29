@@ -1,4 +1,4 @@
-package com.example.zvukus.tools
+package com.example.zvukus.view.tools
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.zvukus.PlayerViewModel
+import com.example.zvukus.view.tools.recordPanel.RecordPanel
 
 @Composable
 fun ToolsPanel(

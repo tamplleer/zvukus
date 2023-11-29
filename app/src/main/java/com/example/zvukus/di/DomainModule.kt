@@ -6,6 +6,8 @@ import com.example.zvukus.services.AudioRecorder
 import com.example.zvukus.services.AudioRecorderService
 import com.example.zvukus.services.SharedAudio
 import com.example.zvukus.services.SharedService
+import com.example.zvukus.services.TrackDefaultService
+import com.example.zvukus.services.TrackService
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -32,4 +34,9 @@ interface DomainModule {
     fun bindsAudioManagerService(
         audioManager: AudioManagerServiceMediaPlayer
     ): AudioManagerService
+    @Binds
+    @Singleton
+    fun bindsTrackService(
+        trackService: TrackDefaultService
+    ): TrackService
 }

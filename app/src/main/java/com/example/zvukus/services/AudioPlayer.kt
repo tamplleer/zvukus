@@ -4,27 +4,24 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
 import androidx.core.net.toUri
+import com.example.zvukus.TrackMediaPlayer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
-import kotlin.time.Duration
 
 
-data class AudioTrack(
+data class AudioTrack @Inject constructor(
     val id: String,
     var volume: Float,
-    val loop: Int,
-    val priority: Int = 1,
+    val loop: Int,//todo delete
+    val priority: Int = 1,//todo delete
     var intervalTime: Float? = null,
     val name: String,
-    var mediaPlayer: MediaPlayer? = null,
+    var mediaPlayer: TrackMediaPlayer? = null,
     val resourceId: Int? = null,
     val file: File? = null,
     var soundId: Int = -1,
@@ -38,47 +35,44 @@ data class AudioTrack(
 }
 
 interface AudioManagerService {
-    fun addAudio(track: AudioTrack): MediaPlayer?
-    fun addAudioFile(id: String, file: File?): MediaPlayer?
+    fun addAudio(track: AudioTrack): TrackMediaPlayer?
+    fun addAudioFile(file: File?): TrackMediaPlayer?
 
     fun startAll(tracks: List<AudioTrack>, coroutineScope: CoroutineScope)
     fun startOne(track: AudioTrack, tracks: List<AudioTrack>, scope: CoroutineScope)
     fun stopAll(tracks: List<AudioTrack>)
 
-    fun changeVolume(track: AudioTrack, value: Float): MediaPlayer?
+    fun changeVolume(track: AudioTrack, value: Float): TrackMediaPlayer?
     fun changeIntervalTime(
         track: AudioTrack,
         value: Float,
         coroutineScope: CoroutineScope
-    ): MediaPlayer?
+    ): TrackMediaPlayer?
 
-    fun stopTrack(id: String, mediaPlayer: MediaPlayer?)
-    fun stopAndReleaseTrack(mediaPlayer: MediaPlayer?)
+    fun stopTrack(id: String, mediaPlayer: TrackMediaPlayer?)
+    fun stopAndReleaseTrack(mediaPlayer: TrackMediaPlayer?, trackId: String)
 }
 
 class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val context: Context) :
     AudioManagerService {
 
-    private val players = mutableMapOf<String, String>()// todo вынести во вью модел
-    //  private val playersRun = MutableStateFlow(players.toMap())
+    private val activeIdSessionMap = mutableMapOf<String, String>()// todo вынести во вью модел
 
-    override fun addAudio(track: AudioTrack): MediaPlayer? {
+    override fun addAudio(track: AudioTrack): TrackMediaPlayer? {
         return if (track.resourceId == null) {
             null
         } else {
-            players[track.id] = UUID.randomUUID().toString()
-            MediaPlayer.create(context, track.resourceId).apply {
-                isLooping = true
-                setVolume(track.volume, track.volume)
-                //   playbackParams = playbackParams.setSpeed(track.rate)
-            }
+            TrackMediaPlayer(
+                MediaPlayer.create(context, track.resourceId).apply {
+                    isLooping = true
+                    setVolume(track.volume, track.volume)
+                })
         }
     }
 
-    override fun addAudioFile(id: String, file: File?): MediaPlayer? {
+    override fun addAudioFile(file: File?): TrackMediaPlayer? {
         return if (file != null) {
-            players[id] = UUID.randomUUID().toString()
-            MediaPlayer.create(context, file.toUri())
+            TrackMediaPlayer(MediaPlayer.create(context, file.toUri()))
         } else {
             null
         }
@@ -87,25 +81,25 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
     override fun startAll(tracks: List<AudioTrack>, coroutineScope: CoroutineScope) {
         stopAll(tracks)
         for (track in tracks) {
-            players[track.id] = UUID.randomUUID().toString()
-            track.mediaPlayer?.apply {
+            activeIdSessionMap[track.id] = UUID.randomUUID().toString()
+            track.mediaPlayer?.mediaPlayer?.apply {
                 prepareAsync()
                 setOnPreparedListener {
                     start()
                     track.intervalTime?.let {
                         coroutineScope.launch {
-                            val streamId = players[track.id]
-                            while (players[track.id] == streamId) {
+                            val streamId = activeIdSessionMap[track.id]
+                            while (activeIdSessionMap[track.id] == streamId) {
                                 delay(duration.toLong())
-                                if (players[track.id] == streamId) {
+                                if (activeIdSessionMap[track.id] == streamId) {
                                     pause()
                                     Log.i("aa", "111 ${isPlaying}")
                                     delay((it * 1000).toLong())
                                 }
 
 
-                                Log.i("aa", "st ${players[track.id] == streamId}")
-                                if (players[track.id] == streamId) {
+                                Log.i("aa", "st ${activeIdSessionMap[track.id] == streamId}")
+                                if (activeIdSessionMap[track.id] == streamId) {
                                     start()
                                 }
                             }
@@ -113,7 +107,9 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
                     }
                 }
                 setOnCompletionListener {
-                    stop()
+                    Log.i("aa","STOP ${isPlaying}")
+                    if (isPlaying){stop()}
+
                 }
             }
         }
@@ -125,25 +121,26 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
         coroutineScope: CoroutineScope
     ) {
         stopAll(tracks)
-        track.mediaPlayer?.apply {
-            players[track.id] = UUID.randomUUID().toString()
+        track.mediaPlayer?.mediaPlayer?.apply {
+            activeIdSessionMap[track.id] = UUID.randomUUID().toString()
+            Log.i("aa", "track = ${activeIdSessionMap.map { it }}")
             prepareAsync()
             setOnPreparedListener {
                 start()
                 Log.i("aa", "111 == ${duration}")
                 track.intervalTime?.let {
                     coroutineScope.launch {
-                        val streamId = players[track.id]
-                        while (players[track.id] == streamId) {
+                        val streamId = activeIdSessionMap[track.id]
+                        while (activeIdSessionMap[track.id] == streamId) {
                             delay(duration.toLong())
-                            if (players[track.id] == streamId) {
+                            if (activeIdSessionMap[track.id] == streamId) {
                                 pause()
                                 delay((it * 1000).toLong())
                             }
 
 
-                            Log.i("aa", "st ${players[track.id] == streamId}")
-                            if (players[track.id] == streamId) {
+                            Log.i("aa", "st ${activeIdSessionMap[track.id] == streamId}")
+                            if (activeIdSessionMap[track.id] == streamId) {
                                 start()
                             }
                         }
@@ -159,62 +156,62 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
 
     override fun stopAll(tracks: List<AudioTrack>) {
         for (track in tracks) {
-            players[track.id] = UUID.randomUUID().toString()
-            track.mediaPlayer?.apply {
+            activeIdSessionMap[track.id] = UUID.randomUUID().toString()
+            track.mediaPlayer?.mediaPlayer?.apply {
                 stop()
             }
         }
     }
 
-    override fun stopTrack(id: String, mediaPlayer: MediaPlayer?) {
-        mediaPlayer?.apply {
-            players[id] = UUID.randomUUID().toString()
+    override fun stopTrack(id: String, mediaPlayer: TrackMediaPlayer?) {
+        mediaPlayer?.mediaPlayer?.apply {
+            activeIdSessionMap[id] = UUID.randomUUID().toString()
             stop()
         }
     }
 
-    override fun stopAndReleaseTrack(mediaPlayer: MediaPlayer?) {
-        mediaPlayer?.apply {
+    override fun stopAndReleaseTrack(mediaPlayer: TrackMediaPlayer?, trackId: String) {
+        activeIdSessionMap.remove(trackId)
+        mediaPlayer?.mediaPlayer?.apply {
             if (isPlaying) {
                 stop()
                 release()
             }
-            //todo remove trakRun
-            //todo stop when close app
+            //todo release when stop!!
         }
     }
 
-    override fun changeVolume(track: AudioTrack, value: Float): MediaPlayer? =
-        track.mediaPlayer?.apply {
+    override fun changeVolume(track: AudioTrack, value: Float): TrackMediaPlayer? =
+        TrackMediaPlayer(track.mediaPlayer?.mediaPlayer?.apply {
             setVolume(value, value)
-        }
+        })
 
     override fun changeIntervalTime(
         track: AudioTrack,
         value: Float,
         coroutineScope: CoroutineScope
-    ): MediaPlayer? {
-        if (track.mediaPlayer?.isPlaying == true) {
+    ): TrackMediaPlayer? {
+        if (track.mediaPlayer?.mediaPlayer?.isPlaying == true) {
             stopTrack(track.id, track.mediaPlayer)
-            return track.mediaPlayer?.apply {
-                players[track.id] = UUID.randomUUID().toString()
+            return TrackMediaPlayer(track.mediaPlayer?.mediaPlayer?.apply {
+                activeIdSessionMap[track.id] = UUID.randomUUID().toString()
                 prepareAsync()
                 setOnPreparedListener {
                     start()
                     value.let {
                         coroutineScope.launch {
-                            val streamId = players[track.id]
-                            while (players[track.id] == streamId) {
+                            val streamId = activeIdSessionMap[track.id]
+                            while (activeIdSessionMap[track.id] == streamId) {
                                 delay(duration.toLong())
-                                if (players[track.id] == streamId) {
+                                if (activeIdSessionMap[track.id] == streamId) {
                                     pause()
                                     Log.i("aa", "vremy =  ${it}")
                                     delay((it * 1000).toLong())
                                 }
 
 
-                                Log.i("aa", "st ${players[track.id] == streamId}")
-                                if (players[track.id] == streamId) {
+                                Log.i("aa", "st ${activeIdSessionMap[track.id] == streamId}")
+                                if (activeIdSessionMap[track.id] == streamId) {
                                     start()
                                 }
                             }
@@ -225,7 +222,7 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
                 setOnCompletionListener {
                     stop()
                 }
-            }
+            })
         }
         return track.mediaPlayer
     }

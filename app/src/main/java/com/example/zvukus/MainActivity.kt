@@ -1,14 +1,12 @@
 package com.example.zvukus
 
 import android.os.Bundle
-import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -18,16 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat
-import com.example.zvukus.layers.Layers
-import com.example.zvukus.samples.Samples
-import com.example.zvukus.timeline.Timeline
-import com.example.zvukus.tools.ToolsPanel
 import com.example.zvukus.ui.theme.ZvukusTheme
-import com.example.zvukus.workspace.WorkSpace
+import com.example.zvukus.view.layers.Layers
+import com.example.zvukus.view.samples.Samples
+import com.example.zvukus.view.timeline.Timeline
+import com.example.zvukus.view.tools.ToolsPanel
+import com.example.zvukus.view.workspace.WorkSpace
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val playerViewModel: PlayerViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ActivityCompat.requestPermissions(
@@ -39,7 +38,6 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             ZvukusTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     color = MaterialTheme.colorScheme.background,
                     modifier = Modifier
@@ -67,6 +65,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+    override fun onPause() {
+        super.onPause()
+        playerViewModel.pause()
     }
 }
 

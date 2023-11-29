@@ -1,7 +1,7 @@
 package com.example.zvukus.di
 
-import com.example.zvukus.FileRepository
-import com.example.zvukus.FileRepositoryCollections
+import com.example.zvukus.repository.TrackRepository
+import com.example.zvukus.repository.TrackRepositoryCollections
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,6 +14,6 @@ interface DataModule {
     @Binds
     @Singleton
     fun bindsFileRepository(
-        fileRepository: FileRepositoryCollections
-    ): FileRepository
+        trackRepository: TrackRepositoryCollections
+    ): TrackRepository
 }

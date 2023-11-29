@@ -32,21 +32,3 @@ class SharedAudio @Inject constructor(@ApplicationContext val context: Context) 
     }
 
 }
-
-/*
-fun sharedComponent(context: Context, file: File?) {
-    // val uri = Uri.parse(track)
-    val uri = FileProvider.getUriForFile(
-        context,
-        context.applicationContext.packageName + ".provider",
-        file!!
-    )
-    val sendIntent: Intent = Intent().apply {
-        action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_STREAM, uri)
-        type = "audio/*"
-        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-    }
-    val shareIntent = Intent.createChooser(sendIntent, "Share Sound File")
-    context.startActivity(shareIntent)
-}*/

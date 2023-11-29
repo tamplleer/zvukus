@@ -1,7 +1,5 @@
-package com.example.zvukus.layers
+package com.example.zvukus.view.layers
 
-import android.content.res.Resources.Theme
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -19,11 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,16 +43,30 @@ import com.example.zvukus.services.AudioTrack
 @Composable
 fun Layers(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewModel()) {
     val listTrack by playerViewModel.listTrack.collectAsState()
-    val listTrackSize by playerViewModel.listTrackSize.collectAsState()
     val showLayer by playerViewModel.showLayer.collectAsState()
-    LayersUi(modifier, listTrack.values.toList(), listTrackSize, showLayer)
+    LayersUi(modifier, listTrack, listTrack.size, showLayer)
 }
 
 @Composable
 fun LayersUi(modifier: Modifier, listTrack: List<AudioTrack>, size: Int, showLayer: Boolean) {
     val lazyListState = rememberLazyListState()
+    var uiUpdate by remember {
+        mutableStateOf(false)
+    }
+
+    fun changeUiUpdate() {
+        uiUpdate = !uiUpdate
+    }
+
     val density = LocalDensity.current
-    Column(modifier = modifier.clip(RoundedCornerShape(20.dp)).background(MaterialTheme.colorScheme.outline).padding(2.dp).clip(RoundedCornerShape(20.dp)).background(MaterialTheme.colorScheme.background)) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.outline)
+            .padding(2.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         AnimatedVisibility(
             visible = showLayer,
             enter = slideInVertically {
@@ -72,15 +79,21 @@ fun LayersUi(modifier: Modifier, listTrack: List<AudioTrack>, size: Int, showLay
             ),
             exit = slideOutVertically() + shrinkVertically() + fadeOut()
         ) {
-            if (size != 0) {
-                LazyColumn(
-                    state = lazyListState, modifier = Modifier
-                        .fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
+
+            LazyColumn(
+                state = lazyListState, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                if (size != 0) {
                     items(
                         count = size,
                     ) {
-                        Track(listTrack[it])
+                        Track(listTrack[it], uiUpdate, ::changeUiUpdate)
+                    }
+                } else {
+                    item {
+                        Text(text = "You haven't had time to add a layer yet")
                     }
                 }
             }
@@ -89,7 +102,12 @@ fun LayersUi(modifier: Modifier, listTrack: List<AudioTrack>, size: Int, showLay
 }
 
 @Composable
-fun Track(track: AudioTrack, playerViewModel: PlayerViewModel = hiltViewModel()) {
+fun Track(
+    track: AudioTrack,
+    uiUpdate: Boolean,
+    changeUiUpdate: () -> Unit,
+    playerViewModel: PlayerViewModel = hiltViewModel()
+) {
     val playTrack = playerViewModel::playTrack
     val stopTrack = playerViewModel::stopTrack
     val remove = playerViewModel::removeTrack
@@ -97,10 +115,6 @@ fun Track(track: AudioTrack, playerViewModel: PlayerViewModel = hiltViewModel())
     val select = playerViewModel::selectTrack
     val isSelected by playerViewModel.selectedTrackId.collectAsState()
     val selectedTrackPlaying by playerViewModel.selectedTrackPlaying.collectAsState()
-    val uiUpdate by playerViewModel.uiUpdate.collectAsState()
-
-
-    Log.i("aa", "$uiUpdate")
 
     fun play() {
         if (selectedTrackPlaying == track.id) {
@@ -134,7 +148,9 @@ fun Track(track: AudioTrack, playerViewModel: PlayerViewModel = hiltViewModel())
                         contentDescription = "play track"
                     )
                 }
-                IconButton(onClick = { mute(track, !track.mute) }) {
+                IconButton(onClick = {
+                    mute(track, !track.mute)
+                    changeUiUpdate()}) {
                     Icon(
                         painter = if (track.mute) painterResource(R.drawable.volume_off) else painterResource(
                             R.drawable.volume

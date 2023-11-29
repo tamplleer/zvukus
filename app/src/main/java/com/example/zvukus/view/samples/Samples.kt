@@ -1,21 +1,16 @@
-package com.example.zvukus.samples
+package com.example.zvukus.view.samples
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-
 import androidx.compose.ui.Modifier
-import com.example.zvukus.services.AudioTrack
 import com.example.zvukus.R
+import com.example.zvukus.services.AudioTrack
 import java.util.UUID
 
 
