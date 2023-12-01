@@ -22,9 +22,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.zvukus.PlayerViewModel
-import com.example.zvukus.services.AudioTrack
+import com.example.zvukus.model.AudioTrack
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Sample(
     icon: Int,
@@ -34,10 +33,40 @@ fun Sample(
     updateExpanded: (String) -> Unit,
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
-
     val addTrack = playerViewModel::addTrack
+
+    SampleUi(
+        addTrack, icon,
+        description,
+        tracks,
+        expanded,
+        updateExpanded
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun SampleUi(
+    addTrack: (AudioTrack) -> Unit, icon: Int,
+    description: String,
+    tracks: List<AudioTrack>,
+    expanded: Boolean,
+    updateExpanded: (String) -> Unit,
+) {
     Column(
-        modifier = Modifier,
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .combinedClickable(
+                role = Role.Button,
+                onClick = {
+                    tracks[0]?.let {
+                        addTrack(it.copy())
+                        updateExpanded("")
+                    }
+                },
+                onLongClick = {
+                    updateExpanded(description)
+                }),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -48,18 +77,6 @@ fun Sample(
                 .background(MaterialTheme.colorScheme.primary)
                 .padding(30.dp)
                 .animateContentSize()
-                .combinedClickable(
-                    role = Role.Button,
-                    onClick = {
-                        tracks[0]?.let {
-                            addTrack(it.copy())
-                            updateExpanded("")
-                        }
-
-                    },
-                    onLongClick = {
-                        updateExpanded(description)
-                    })
 
         ) {
             Column(modifier = Modifier, horizontalAlignment = Alignment.CenterHorizontally) {

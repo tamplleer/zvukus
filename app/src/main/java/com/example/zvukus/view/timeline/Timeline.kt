@@ -33,12 +33,12 @@ fun Timeline(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMode
     val track by playerViewModel.selectedTrackTime.collectAsState()
     val isPlay by playerViewModel.selectedTrackPlay.collectAsState()
 
-    Timeline(modifier = modifier, track = track, isPlay = isPlay)
+    TimelineUi(modifier = modifier, track = track, isPlay = isPlay)
 
 }
 
 @Composable
-fun Timeline(modifier: Modifier, track: Int?, isPlay: Boolean) {
+fun TimelineUi(modifier: Modifier, track: Int?, isPlay: Boolean) {
 
     val localDensity = LocalDensity.current
 

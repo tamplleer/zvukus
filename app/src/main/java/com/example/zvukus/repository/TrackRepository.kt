@@ -1,9 +1,10 @@
 package com.example.zvukus.repository
 
-import com.example.zvukus.services.AudioTrack
+import com.example.zvukus.model.AudioTrack
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.Date
 import javax.inject.Inject
 
 interface TrackRepository {
@@ -27,10 +28,11 @@ class TrackRepositoryCollections @Inject constructor() : TrackRepository {
 
 
     override fun addTrack(track: AudioTrack): AudioTrack {
-        val resultTrack = track.copy(id = tracksData.size.toString())
+        val id = Date().time.toString()
+        val resultTrack = track.copy(id = id)
         tracks.update {
             tracksData.putIfAbsent(
-                tracksData.size.toString(),
+                id,
                 resultTrack
             )
             HashMap(tracksData)

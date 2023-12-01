@@ -1,8 +1,8 @@
 package com.example.zvukus.services
 
 import android.content.Context
-import android.util.Log
 import com.example.zvukus.TrackMediaPlayer
+import com.example.zvukus.model.AudioTrack
 import com.example.zvukus.repository.TrackRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +13,7 @@ interface TrackService {
     fun getTrackList(): Flow<List<AudioTrack>>
     fun addTrack(track: AudioTrack): AudioTrack
     fun removeTrack(id: String)
-    fun changeMute(id: String, mute: Boolean, player: TrackMediaPlayer)//todo вынести media player
+    fun changeMute(id: String, mute: Boolean, player: TrackMediaPlayer)
     fun changeVolume(id: String, player: TrackMediaPlayer, volume: Float = 0.5f)
     fun changeInterval(id: String, player: TrackMediaPlayer, interval: Float = 1f)
     fun getTrackById(id: String): AudioTrack?
@@ -25,12 +25,11 @@ class TrackDefaultService @Inject constructor(
 ) : TrackService {
     override fun getTrackList(): Flow<List<AudioTrack>> =
         trackRepository.getTrackList().map { map ->
-            map.values.toList()
+            map.values.toList().sortedBy { it.id }
 
         }
 
     override fun addTrack(track: AudioTrack): AudioTrack {
-        Log.i("aa", "add = ${track.id}")
         return trackRepository.addTrack(track)
     }
 

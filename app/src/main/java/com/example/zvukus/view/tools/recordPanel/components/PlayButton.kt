@@ -32,7 +32,7 @@ fun PlayButtonUi(play: () -> Unit, selectedTrackPlaying: String) {
             painter = if (selectedTrackPlaying == ALL_TRACK_SELECTED) painterResource(R.drawable.stop) else painterResource(
                 R.drawable.play
             ),
-            contentDescription = "Play record"//todo fix name
+            contentDescription = "Play record"
         )
     }
 }

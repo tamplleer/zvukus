@@ -2,9 +2,9 @@ package com.example.zvukus.services
 
 import android.content.Context
 import android.media.MediaPlayer
-import android.util.Log
 import androidx.core.net.toUri
 import com.example.zvukus.TrackMediaPlayer
+import com.example.zvukus.model.AudioTrack
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -14,25 +14,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 
-data class AudioTrack @Inject constructor(
-    val id: String,
-    var volume: Float,
-    val loop: Int,//todo delete
-    val priority: Int = 1,//todo delete
-    var intervalTime: Float? = null,
-    val name: String,
-    var mediaPlayer: TrackMediaPlayer? = null,
-    val resourceId: Int? = null,
-    val file: File? = null,
-    var soundId: Int = -1,
-    var mute: Boolean = false,
-) {
-    companion object {
-        fun defaultTrack(): AudioTrack =
-            AudioTrack(UUID.randomUUID().toString(), 1.0f, 0, 1, 2f, "Unknown")
-    }
 
-}
 
 interface AudioManagerService {
     fun addAudio(track: AudioTrack): TrackMediaPlayer?
@@ -56,7 +38,7 @@ interface AudioManagerService {
 class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val context: Context) :
     AudioManagerService {
 
-    private val activeIdSessionMap = mutableMapOf<String, String>()// todo вынести во вью модел
+    private val activeIdSessionMap = mutableMapOf<String, String>()
 
     override fun addAudio(track: AudioTrack): TrackMediaPlayer? {
         return if (track.resourceId == null) {
@@ -93,12 +75,10 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
                                 delay(duration.toLong())
                                 if (activeIdSessionMap[track.id] == streamId) {
                                     pause()
-                                    Log.i("aa", "111 ${isPlaying}")
                                     delay((it * 1000).toLong())
                                 }
 
 
-                                Log.i("aa", "st ${activeIdSessionMap[track.id] == streamId}")
                                 if (activeIdSessionMap[track.id] == streamId) {
                                     start()
                                 }
@@ -107,7 +87,6 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
                     }
                 }
                 setOnCompletionListener {
-                    Log.i("aa","STOP ${isPlaying}")
                     if (isPlaying){stop()}
 
                 }
@@ -123,11 +102,9 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
         stopAll(tracks)
         track.mediaPlayer?.mediaPlayer?.apply {
             activeIdSessionMap[track.id] = UUID.randomUUID().toString()
-            Log.i("aa", "track = ${activeIdSessionMap.map { it }}")
             prepareAsync()
             setOnPreparedListener {
                 start()
-                Log.i("aa", "111 == ${duration}")
                 track.intervalTime?.let {
                     coroutineScope.launch {
                         val streamId = activeIdSessionMap[track.id]
@@ -139,7 +116,6 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
                             }
 
 
-                            Log.i("aa", "st ${activeIdSessionMap[track.id] == streamId}")
                             if (activeIdSessionMap[track.id] == streamId) {
                                 start()
                             }
@@ -177,7 +153,6 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
                 stop()
                 release()
             }
-            //todo release when stop!!
         }
     }
 
@@ -205,12 +180,8 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
                                 delay(duration.toLong())
                                 if (activeIdSessionMap[track.id] == streamId) {
                                     pause()
-                                    Log.i("aa", "vremy =  ${it}")
                                     delay((it * 1000).toLong())
                                 }
-
-
-                                Log.i("aa", "st ${activeIdSessionMap[track.id] == streamId}")
                                 if (activeIdSessionMap[track.id] == streamId) {
                                     start()
                                 }

@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.zvukus.di.coroutine.Dispatcher
 import com.example.zvukus.di.coroutine.ZvukusDispatchers
+import com.example.zvukus.model.AudioTrack
 import com.example.zvukus.services.AudioManagerService
 import com.example.zvukus.services.AudioRecorder
-import com.example.zvukus.services.AudioTrack
 import com.example.zvukus.services.SharedService
 import com.example.zvukus.services.TrackService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +22,7 @@ import javax.inject.Inject
 
 
 const val ALL_TRACK_SELECTED = "all"
+
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     private val trackService: TrackService,
@@ -73,6 +74,7 @@ class PlayerViewModel @Inject constructor(
     fun recordTrack() {
         recordFile = audioRecorder.startRecordTrack("track.mp3")
     }
+
     fun stopRecordTrack() {
         audioRecorder.stop()
     }
@@ -82,7 +84,12 @@ class PlayerViewModel @Inject constructor(
         recordFile?.let {
             audioManagerService.addAudioFile(it)?.also { player ->
                 val track = AudioTrack.defaultTrack()
-                    .copy(file = it, mediaPlayer = player, name = recordFile?.name ?: "record", intervalTime = null)
+                    .copy(
+                        file = it,
+                        mediaPlayer = player,
+                        name = recordFile?.name ?: "record",
+                        intervalTime = null
+                    )
 
                 selectTrack(trackService.addTrack(track))
             }
@@ -95,12 +102,19 @@ class PlayerViewModel @Inject constructor(
 
 
     fun playAll() {
+        _selectedTrackTime.update {
+            listTrack.value.maxByOrNull {
+                it.mediaPlayer?.mediaPlayer?.duration ?: 0
+            }?.mediaPlayer?.mediaPlayer?.duration
+        }
         audioManagerService.startAll(listTrack.value, scope)
         _selectedTrackPlay.update { true }
         _selectedTrackPlaying.update { ALL_TRACK_SELECTED }
+
     }
 
     fun playTrack(track: AudioTrack) {
+        selectTrack(track)
         audioManagerService.startOne(track, listTrack.value, scope)
         _selectedTrackPlay.update { true }
         _selectedTrackPlaying.update { track.id }
@@ -148,6 +162,7 @@ class PlayerViewModel @Inject constructor(
     fun addTrack(track: AudioTrack) {
         audioManagerService.addAudio(track)?.also {
             selectTrack(trackService.addTrack(track.apply { mediaPlayer = it }))
+            _showLayer.update { true }
         }
 
     }
@@ -155,7 +170,6 @@ class PlayerViewModel @Inject constructor(
     fun selectTrack(track: AudioTrack) {
         _selectedTrack.update { track.id }
         _selectedTrackTime.update { track.mediaPlayer?.mediaPlayer?.duration }
-
     }
 
     fun removeTrack(track: AudioTrack) {
@@ -169,7 +183,6 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun resume() {
-        //todo
     }
 
 }

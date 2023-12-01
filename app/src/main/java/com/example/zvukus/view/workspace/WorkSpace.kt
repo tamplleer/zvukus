@@ -1,5 +1,9 @@
 package com.example.zvukus.view.workspace
 
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -18,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,6 +37,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.zvukus.PlayerViewModel
+import com.example.zvukus.model.AudioTrack
 import java.lang.StrictMath.round
 
 fun Modifier.vertical() =
@@ -47,29 +53,58 @@ fun Modifier.vertical() =
 
 @Composable
 fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewModel()) {
-    val changeVolume = playerViewModel::changeVolume
-    val getTrackById = playerViewModel::getTrackById
-    val changeIntervalTime = playerViewModel::changeIntervalTime
     val trackId by playerViewModel.selectedTrackId.collectAsState()
+    WorkSpaceUi(
+        modifier,
+        trackId,
+        playerViewModel::changeIntervalTime,
+        playerViewModel::getTrackById,
+        playerViewModel::changeVolume
+    )
 
-    var currentOffsetX by remember { mutableStateOf(50f) }
-    var currentOffsetY by remember { mutableStateOf(50f) }
+}
 
-    var maxOffsetX by remember { mutableStateOf(0f) }
-    var minOffsetX by remember { mutableStateOf(0f) }
+@Composable
+fun WorkSpaceUi(
+    modifier: Modifier,
+    trackId: String?,
+    changeIntervalTime: (Float) -> Unit,
+    getTrackById: (String?) -> AudioTrack?,
+    changeVolume: (Float) -> Unit
+) {
 
-    var maxOffsetY by remember { mutableStateOf(0f) }
-    var minOffsetY by remember { mutableStateOf(0f) }
+    var currentOffsetX by remember { mutableFloatStateOf(50f) }
+    var currentOffsetY by remember { mutableFloatStateOf(50f) }
 
-    var sizePoint by remember { mutableStateOf(0f) }
-    LaunchedEffect(trackId) {
-        getTrackById(trackId)?.let {
-            currentOffsetX = 10 * (maxOffsetY / 50) * (it.intervalTime ?: 0f)
-            currentOffsetY = 10 * (maxOffsetX / 10) * it.volume
-        }
+    var maxOffsetX by remember { mutableFloatStateOf(0f) }
+    var minOffsetX by remember { mutableFloatStateOf(0f) }
+
+    var maxOffsetY by remember { mutableFloatStateOf(0f) }
+    var minOffsetY by remember { mutableFloatStateOf(0f) }
+
+    fun setCurrentOffsetX(value: Float) {
+        currentOffsetX = value
+    }
+
+    fun setCurrentOffsetY(value: Float) {
+        currentOffsetY = value
+    }
+
+    fun setMinMaxYX(xPosition: Float, yPosition: Float) {
+        maxOffsetX = xPosition
+        minOffsetX = 0f
+
+        maxOffsetY = yPosition
+        minOffsetY = 0f
     }
 
 
+    LaunchedEffect(trackId) {
+        getTrackById(trackId)?.let {
+            currentOffsetX =  (maxOffsetX / 10) * (it.intervalTime ?: 0f)
+            currentOffsetY = 10 * (maxOffsetY / 10) * it.volume
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -77,119 +112,204 @@ fun WorkSpace(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMod
 
     ) {
         Row {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight(0.9f)
-                    .width(20.dp)
-                    .background(MaterialTheme.colorScheme.background)
+            VerticalIndicator(currentOffsetY, maxOffsetY)
 
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(2.dp)
-                        .graphicsLayer(
-                            translationX = 0f,
-                            translationY = currentOffsetY,
-                        )
-                        .clip(RoundedCornerShape(10.dp))
-                        .height(70.dp)
-                        .width(20.dp)
-                        .background(MaterialTheme.colorScheme.secondary),
+            IndicatorField(
+                minOffsetX,
+                maxOffsetX,
+                maxOffsetY,
+                minOffsetY,
+                currentOffsetX,
+                currentOffsetY,
+                changeIntervalTime,
+                changeVolume,
+                ::setCurrentOffsetX,
+                ::setCurrentOffsetY,
+                ::setMinMaxYX
+            )
 
-
-                    ) {
-                    Text(
-                        modifier = Modifier,
-                        color = MaterialTheme.colorScheme.background,
-                        text = " V${round(currentOffsetY / (maxOffsetY / 10))}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-            Box(
-                modifier = modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.9f)
-                    .background(MaterialTheme.colorScheme.secondary)
-                    .onGloballyPositioned { position ->
-                        val positionX = position.size.width.toFloat()
-                        val positionY = position.size.height.toFloat()
-
-                        maxOffsetX = positionX
-                        minOffsetX = 0f
-
-                        maxOffsetY = positionY
-                        minOffsetY = 0f
-                    }
-            ) {
-                Box(modifier = Modifier
-                    .size(15.dp)
-                    .graphicsLayer(
-                        translationX = currentOffsetX,
-                        translationY = currentOffsetY,
-                    )
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.Green)
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = {
-
-                            },
-                            onDrag = { _, dragAmount ->
-
-                                val nextX = currentOffsetX + dragAmount.x
-                                if (nextX + sizePoint < maxOffsetX && nextX > minOffsetX) {
-                                    currentOffsetX = nextX
-                                }
-                                val nextY = currentOffsetY + dragAmount.y
-                                if (nextY + sizePoint < maxOffsetY && nextY > minOffsetY) {
-                                    currentOffsetY = nextY
-                                }
-                            },
-                            onDragEnd = {
-                                changeVolume(round(currentOffsetY / (maxOffsetY / 10)).toFloat() / 10)
-                                changeIntervalTime(round(currentOffsetX / (maxOffsetX / 50)).toFloat() / 10)
-                            },
-                        )
-
-                    }
-                    .onGloballyPositioned { position ->
-                        sizePoint = position.size.width.toFloat()
-
-                    }) {
-
-                }
-            }
         }
-        Row(
+        HorizontalIndicator(currentOffsetX, maxOffsetX)
+    }
+}
+
+
+@Composable
+fun HorizontalIndicator(currentOffsetX: Float, maxOffsetX: Float) {
+    var width by remember { mutableFloatStateOf(0f) }
+
+    fun setPosition(): Float {
+        if (currentOffsetX - width / 2 < 0) {
+            return width / 2
+        } else if (maxOffsetX > currentOffsetX + width / 2) {
+            return currentOffsetX
+        }
+        return maxOffsetX - (width / 2)
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(20.dp)
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .graphicsLayer(
+                    translationX = setPosition(),
+                    translationY = 0f,
+                )
+                .padding(2.dp)
                 .height(20.dp)
-                .background(MaterialTheme.colorScheme.background)
+                .clip(RoundedCornerShape(10.dp))
+                .width(60.dp)
+                .background(MaterialTheme.colorScheme.secondary)
+                .onGloballyPositioned { position ->
+                    width = position.size.width.toFloat()
+
+                }
+
         ) {
-            Box(
-                modifier = Modifier
-                    .graphicsLayer(
-                        translationX = currentOffsetX,
-                        translationY = 0f,
-                    )
-                    .padding(2.dp)
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .width(60.dp)
-                    .background(MaterialTheme.colorScheme.secondary)
+            Text(
+                modifier = Modifier.align(
+                    Alignment.Center
+                ),
+                text = "Speed ${round(currentOffsetX / (maxOffsetX / 10))}",
+                color = MaterialTheme.colorScheme.background,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+@Composable
+fun VerticalIndicator(currentOffsetY: Float, maxOffsetY: Float) {
+    var height by remember { mutableFloatStateOf(0f) }
+    Column(
+        modifier = Modifier
+            .fillMaxHeight(0.9f)
+            .width(20.dp)
+            .background(MaterialTheme.colorScheme.background)
+
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(2.dp)
+                .graphicsLayer(
+                    translationX = 0f,
+                    translationY = if (maxOffsetY > currentOffsetY + height+5) currentOffsetY else (maxOffsetY - height-5),
+                )
+                .clip(RoundedCornerShape(10.dp))
+                .height(70.dp)
+                .width(20.dp)
+                .background(MaterialTheme.colorScheme.secondary)
+                .onGloballyPositioned { position ->
+                    height = position.size.height.toFloat()
+
+                },
+
 
             ) {
-                Text(
-                    modifier = Modifier.align(
-                        Alignment.Center
-                    ),
-                    text = "Speed ${round(currentOffsetX / (maxOffsetX / 10))}",
-                    color = MaterialTheme.colorScheme.background,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            Text(
+                modifier = Modifier,
+                color = MaterialTheme.colorScheme.background,
+                text = " V${round(currentOffsetY / (maxOffsetY / 10))}",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
+    }
+}
+
+@Composable
+fun IndicatorField(
+    minOffsetX: Float,
+    maxOffsetX: Float,
+    maxOffsetY: Float,
+    minOffsetY: Float,
+    globalOffsetX: Float,
+    globalOffsetY: Float,
+    changeIntervalTime: (Float) -> Unit,
+    changeVolume: (Float) -> Unit,
+    setCurrentOffsetX: (Float) -> Unit,
+    setCurrentOffsetY: (Float) -> Unit,
+    setMinMaxYX: (Float, Float) -> Unit,
+) {
+    var sizePoint by remember { mutableFloatStateOf(0f) }
+    var currentOffsetX by remember { mutableFloatStateOf(50f) }
+    var currentOffsetY by remember { mutableFloatStateOf(50f) }
+    var isDrag by remember { mutableStateOf(false) }
+
+    LaunchedEffect(globalOffsetX, globalOffsetY) {
+        currentOffsetX = globalOffsetX
+        currentOffsetY = globalOffsetY
+    }
+
+    val transition = updateTransition(
+        targetState = isDrag,
+        label = "playing"
+    )
+
+    val animateDrag: Float by transition.animateFloat(
+        transitionSpec = {
+            tween(100, easing = CubicBezierEasing(0.3f, 0.4f, 0.5f, 0.1f))
+        },
+        label = "dragSize"
+    ) { state ->
+        when (state) {
+            false -> 15f
+            true -> 20f
+        }
+
+    }
+
+
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .fillMaxWidth()
+            .fillMaxHeight(0.9f)
+            .background(MaterialTheme.colorScheme.secondary)
+            .onGloballyPositioned { position ->
+                val positionX = position.size.width.toFloat()
+                val positionY = position.size.height.toFloat()
+
+                setMinMaxYX(positionX, positionY)
+            }
+    ) {
+        Box(modifier = Modifier
+            .size(animateDrag.dp)
+            .graphicsLayer(
+                translationX = currentOffsetX,
+                translationY = currentOffsetY,
+            )
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color.Green)
+            .pointerInput(maxOffsetX, minOffsetY, maxOffsetY, maxOffsetX) {
+                detectDragGestures(
+                    onDragStart = {
+
+                    },
+                    onDrag = { _, dragAmount ->
+                        val nextX = currentOffsetX + dragAmount.x
+                        isDrag = true
+                        if (nextX + sizePoint < maxOffsetX && nextX > minOffsetX) {
+                            setCurrentOffsetX(nextX)
+                        }
+                        val nextY = currentOffsetY + dragAmount.y
+                        if (nextY + sizePoint < maxOffsetY && nextY > minOffsetY) {
+                            setCurrentOffsetY(nextY)
+                        }
+                    },
+                    onDragEnd = {
+                        isDrag = false
+                        changeVolume(round(currentOffsetY / (maxOffsetY / 10)).toFloat() / 10)
+                        changeIntervalTime(round(currentOffsetX / (maxOffsetX / 100) / 10).toFloat())
+                    },
+                )
+
+            }
+            .onGloballyPositioned { position ->
+                sizePoint = position.size.width.toFloat()
+
+            }) {}
     }
 }

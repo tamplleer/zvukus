@@ -59,13 +59,14 @@ class MainActivity : ComponentActivity() {
                                 }
                                 Layers(Modifier.align(Alignment.BottomStart))
                             }
-                            ToolsPanel(Modifier.weight(0.06f), this@MainActivity)
+                            ToolsPanel(Modifier.weight(0.06f))
                         }
                     }
                 }
             }
         }
     }
+
     override fun onPause() {
         super.onPause()
         playerViewModel.pause()
