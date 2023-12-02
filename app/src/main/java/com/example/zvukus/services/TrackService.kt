@@ -17,6 +17,8 @@ interface TrackService {
     fun changeVolume(id: String, player: TrackMediaPlayer, volume: Float = 0.5f)
     fun changeInterval(id: String, player: TrackMediaPlayer, interval: Float = 1f)
     fun getTrackById(id: String): AudioTrack?
+    fun setSelectedTrack(track: AudioTrack)
+    fun getSelectTrack(): Flow<AudioTrack?>
 }
 
 class TrackDefaultService @Inject constructor(
@@ -60,5 +62,11 @@ class TrackDefaultService @Inject constructor(
     }
 
     override fun getTrackById(id: String): AudioTrack? = trackRepository.getTrackById(id)
+    override fun setSelectedTrack(track: AudioTrack) {
+        trackRepository.setSelectedTrack(track)
+    }
+
+    override fun getSelectTrack(): Flow<AudioTrack?> = trackRepository.getSelectTrack()
+
 
 }

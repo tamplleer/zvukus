@@ -2,6 +2,7 @@ package com.example.zvukus.services
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.util.Log
 import androidx.core.net.toUri
 import com.example.zvukus.TrackMediaPlayer
 import com.example.zvukus.model.AudioTrack
@@ -12,8 +13,6 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
-
-
 
 
 interface AudioManagerService {
@@ -31,7 +30,7 @@ interface AudioManagerService {
         coroutineScope: CoroutineScope
     ): TrackMediaPlayer?
 
-    fun stopTrack(id: String, mediaPlayer: TrackMediaPlayer?)
+    fun stopTrack(id: String, mediaPlayer: TrackMediaPlayer?): TrackMediaPlayer?
     fun stopAndReleaseTrack(mediaPlayer: TrackMediaPlayer?, trackId: String)
 }
 
@@ -87,7 +86,9 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
                     }
                 }
                 setOnCompletionListener {
-                    if (isPlaying){stop()}
+                    if (isPlaying) {
+                        stop()
+                    }
 
                 }
             }
@@ -100,6 +101,7 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
         coroutineScope: CoroutineScope
     ) {
         stopAll(tracks)
+        Log.i("aa","${track.mediaPlayer?.mediaPlayer?.duration}")
         track.mediaPlayer?.mediaPlayer?.apply {
             activeIdSessionMap[track.id] = UUID.randomUUID().toString()
             prepareAsync()
@@ -125,7 +127,9 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
                 }
             }
             setOnCompletionListener {
-                stop()
+                if (track.intervalTime == null) {
+                    stop()
+                }
             }
         }
     }
@@ -139,11 +143,12 @@ class AudioManagerServiceMediaPlayer @Inject constructor(@ApplicationContext val
         }
     }
 
-    override fun stopTrack(id: String, mediaPlayer: TrackMediaPlayer?) {
-        mediaPlayer?.mediaPlayer?.apply {
+    override fun stopTrack(id: String, mediaPlayer: TrackMediaPlayer?): TrackMediaPlayer? {
+        val media = mediaPlayer?.mediaPlayer?.apply {
             activeIdSessionMap[id] = UUID.randomUUID().toString()
             stop()
         }
+        return if (media != null) TrackMediaPlayer(mediaPlayer = media) else null
     }
 
     override fun stopAndReleaseTrack(mediaPlayer: TrackMediaPlayer?, trackId: String) {

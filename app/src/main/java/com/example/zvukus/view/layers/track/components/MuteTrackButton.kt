@@ -5,7 +5,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.zvukus.PlayerViewModel
+import com.example.zvukus.screen.main.PlayerViewModel
 import com.example.zvukus.R
 import com.example.zvukus.model.AudioTrack
 

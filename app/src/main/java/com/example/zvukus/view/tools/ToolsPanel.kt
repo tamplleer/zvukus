@@ -8,21 +8,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.zvukus.PlayerViewModel
+import com.example.zvukus.screen.main.PlayerViewModel
 import com.example.zvukus.view.tools.recordPanel.RecordPanel
 
 @Composable
 fun ToolsPanel(
     modifier: Modifier,
+    toVisualTrack: () -> Unit,
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val showCloseLayer = playerViewModel::showCloseLayer
-    ToolsPanelUi(modifier, showCloseLayer)
+    ToolsPanelUi(modifier, showCloseLayer, toVisualTrack)
 
 }
 
 @Composable
-fun ToolsPanelUi(modifier: Modifier, showCloseLayer: () -> Unit) {
+fun ToolsPanelUi(modifier: Modifier, showCloseLayer: () -> Unit, toVisualTrack: () -> Unit) {
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -32,6 +33,6 @@ fun ToolsPanelUi(modifier: Modifier, showCloseLayer: () -> Unit) {
         Button(onClick = { showCloseLayer() }) {
             Text(text = "Layer")
         }
-        RecordPanel()
+        RecordPanel(toVisualTrack)
     }
 }

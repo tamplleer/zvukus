@@ -1,7 +1,8 @@
-package com.example.zvukus
+package com.example.zvukus.screen.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.zvukus.TrackMediaPlayer
 import com.example.zvukus.di.coroutine.Dispatcher
 import com.example.zvukus.di.coroutine.ZvukusDispatchers
 import com.example.zvukus.model.AudioTrack
@@ -168,6 +169,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun selectTrack(track: AudioTrack) {
+        selectTrackGlobal(track)
         _selectedTrack.update { track.id }
         _selectedTrackTime.update { track.mediaPlayer?.mediaPlayer?.duration }
     }
@@ -175,6 +177,10 @@ class PlayerViewModel @Inject constructor(
     fun removeTrack(track: AudioTrack) {
         audioManagerService.stopAndReleaseTrack(track.mediaPlayer, track.id)
         trackService.removeTrack(track.id)
+    }
+
+    fun selectTrackGlobal(track: AudioTrack){
+        trackService.setSelectedTrack(track)
     }
 
 

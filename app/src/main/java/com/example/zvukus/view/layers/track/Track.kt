@@ -18,7 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.zvukus.PlayerViewModel
+import com.example.zvukus.screen.main.PlayerViewModel
 import com.example.zvukus.model.AudioTrack
 import com.example.zvukus.view.layers.track.components.DeleteTrackButton
 import com.example.zvukus.view.layers.track.components.MuteTrackButton
@@ -29,13 +29,14 @@ fun Track(
     track: AudioTrack,
     uiUpdate: Boolean,
     changeUiUpdate: () -> Unit,
+    toVisualTrack: () -> Unit,
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val select = playerViewModel::selectTrack
     val selected by playerViewModel.selectedTrackId.collectAsState()
     uiUpdate
 
-    TrackUi(select, selected, changeUiUpdate, track)
+    TrackUi(select, selected, changeUiUpdate, track,toVisualTrack)
 
 }
 
@@ -44,7 +45,8 @@ fun TrackUi(
     select: (AudioTrack) -> Unit,
     selected: String?,
     changeUiUpdate: () -> Unit,
-    track: AudioTrack
+    track: AudioTrack,
+    toVisualTrack: () -> Unit,
 ) {
     Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -60,7 +62,7 @@ fun TrackUi(
         {
             Text(text = track.name, modifier = Modifier.padding(start = 10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PlayTrackButton(track)
+                PlayTrackButton(track,toVisualTrack)
                 MuteTrackButton(track, changeUiUpdate)
 
             }

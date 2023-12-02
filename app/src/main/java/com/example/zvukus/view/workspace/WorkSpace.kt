@@ -36,8 +36,8 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.zvukus.PlayerViewModel
 import com.example.zvukus.model.AudioTrack
+import com.example.zvukus.screen.main.PlayerViewModel
 import java.lang.StrictMath.round
 
 fun Modifier.vertical() =

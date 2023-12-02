@@ -29,19 +29,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.zvukus.PlayerViewModel
+import com.example.zvukus.screen.main.PlayerViewModel
 import com.example.zvukus.model.AudioTrack
 import com.example.zvukus.view.layers.track.Track
 
 @Composable
-fun Layers(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewModel()) {
+fun Layers(modifier: Modifier, toVisualTrack: () -> Unit,playerViewModel: PlayerViewModel = hiltViewModel()) {
     val listTrack by playerViewModel.listTrack.collectAsState()
     val showLayer by playerViewModel.showLayer.collectAsState()
-    LayersUi(modifier, listTrack, listTrack.size, showLayer)
+    LayersUi(modifier, listTrack, listTrack.size, showLayer,toVisualTrack)
 }
 
 @Composable
-fun LayersUi(modifier: Modifier, listTrack: List<AudioTrack>, size: Int, showLayer: Boolean) {
+fun LayersUi(modifier: Modifier, listTrack: List<AudioTrack>, size: Int, showLayer: Boolean,toVisualTrack: () -> Unit) {
     val lazyListState = rememberLazyListState()
     var uiUpdate by remember {
         mutableStateOf(false)
@@ -81,7 +81,7 @@ fun LayersUi(modifier: Modifier, listTrack: List<AudioTrack>, size: Int, showLay
                     items(
                         count = size,
                     ) {
-                        Track(listTrack[it], uiUpdate, ::changeUiUpdate)
+                        Track(listTrack[it], uiUpdate, ::changeUiUpdate,toVisualTrack)
                     }
                 } else {
                     item {

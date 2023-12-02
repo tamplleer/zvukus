@@ -10,7 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.zvukus.PlayerViewModel
+import com.example.zvukus.screen.main.PlayerViewModel
 import com.example.zvukus.R
 import com.example.zvukus.view.tools.recordPanel.getColor
 import java.util.UUID

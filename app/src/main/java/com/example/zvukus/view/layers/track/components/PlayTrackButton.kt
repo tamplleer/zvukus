@@ -7,12 +7,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.zvukus.PlayerViewModel
 import com.example.zvukus.R
 import com.example.zvukus.model.AudioTrack
+import com.example.zvukus.screen.main.PlayerViewModel
 
 @Composable
-fun PlayTrackButton(track: AudioTrack, playerViewModel: PlayerViewModel = hiltViewModel()) {
+fun PlayTrackButton(track: AudioTrack,  toVisualTrack: () -> Unit, playerViewModel: PlayerViewModel = hiltViewModel()) {
     val selectedTrackPlaying by playerViewModel.selectedTrackPlaying.collectAsState()
     val playTrack = playerViewModel::playTrack
     val stopTrack = playerViewModel::stopTrack
@@ -21,7 +21,8 @@ fun PlayTrackButton(track: AudioTrack, playerViewModel: PlayerViewModel = hiltVi
         if (selectedTrackPlaying == track.id) {
             stopTrack(track.id, track.mediaPlayer)
         } else {
-            playTrack(track)
+           // playTrack(track)
+            toVisualTrack()
         }
     }
     PlayTrackButtonUi(::play, selectedTrackPlaying, track)

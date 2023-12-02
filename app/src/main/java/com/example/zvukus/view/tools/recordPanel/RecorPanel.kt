@@ -8,11 +8,11 @@ import com.example.zvukus.view.tools.recordPanel.components.RecordMicButton
 import com.example.zvukus.view.tools.recordPanel.components.RecordTrackButton
 
 @Composable
-fun RecordPanel() {
+fun RecordPanel(toVisualTrack:()->Unit) {
     Row {
         RecordMicButton()
         RecordTrackButton()
-        PlayButton()
+        PlayButton(toVisualTrack)
     }
 }
 

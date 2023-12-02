@@ -1,5 +1,6 @@
 package com.example.zvukus.view.timeline
 
+import android.util.Log
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -25,7 +26,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.zvukus.PlayerViewModel
+import com.example.zvukus.screen.main.PlayerViewModel
+import com.example.zvukus.screen.visual.VisualViewModel
 
 
 @Composable
@@ -34,6 +36,20 @@ fun Timeline(modifier: Modifier, playerViewModel: PlayerViewModel = hiltViewMode
     val isPlay by playerViewModel.selectedTrackPlay.collectAsState()
 
     TimelineUi(modifier = modifier, track = track, isPlay = isPlay)
+
+}
+
+@Composable
+fun TimelineVisual(modifier: Modifier, visualViewModel: VisualViewModel = hiltViewModel()) {
+    val trackTime by visualViewModel.selectedTrackTime.collectAsState()
+    val isPlay by visualViewModel.isRunningTrack.collectAsState()
+
+Log.i("aa","time  = ${trackTime}")
+    TimelineUi(
+        modifier = modifier,
+        track = trackTime,
+        isPlay = isPlay
+    )
 
 }
 

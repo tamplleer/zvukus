@@ -13,6 +13,8 @@ interface TrackRepository {
     fun updateTrack(track: AudioTrack)
     fun removeTrack(id: String)
     fun getTrackById(id: String): AudioTrack?
+    fun setSelectedTrack(track: AudioTrack)
+    fun getSelectTrack(): Flow<AudioTrack?>
 }
 
 class TrackRepositoryCollections @Inject constructor() : TrackRepository {
@@ -20,6 +22,9 @@ class TrackRepositoryCollections @Inject constructor() : TrackRepository {
 
     private val tracksData = mutableMapOf<String, AudioTrack>()
     private val tracks = MutableStateFlow(tracksData.toMap())
+
+
+    private val selected = MutableStateFlow<AudioTrack?>(null)
 
 
     override fun getTrackList(): Flow<Map<String, AudioTrack>> {
@@ -55,4 +60,12 @@ class TrackRepositoryCollections @Inject constructor() : TrackRepository {
     }
 
     override fun getTrackById(id: String): AudioTrack? = tracksData[id]
+    override fun setSelectedTrack(track: AudioTrack) {
+        selected.update { track }
+    }
+
+    override fun getSelectTrack(): Flow<AudioTrack?> {
+        return selected
+    }
+
 }
